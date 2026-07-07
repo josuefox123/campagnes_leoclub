@@ -1,0 +1,19 @@
+{% extends "layouts/base.njk" %}
+
+{% block content %}
+<section class="flex-1 flex flex-col items-center justify-center py-20 text-center px-4">
+  <div class="h-20 w-20 rounded-3xl bg-red-500/10 text-red-500 flex items-center justify-center text-3xl mb-6 border border-red-500/20 shadow-lg shadow-red-550/10">
+    <i class="fa-solid fa-triangle-exclamation"></i>
+  </div>
+  <h1 class="text-4xl font-extrabold text-white tracking-tight sm:text-5xl">404 - Page non trouvée</h1>
+  <p class="text-slate-400 mt-4 max-w-md">La page que vous recherchez n'existe pas ou a été déplacée.</p>
+  <div class="mt-10 flex gap-4">
+    <a href="/" class="rounded-xl bg-brand-600 px-6 py-3 text-sm font-semibold text-white shadow-md hover:bg-brand-500 transition">
+      <i class="fa-solid fa-house mr-2"></i> Retour à l'accueil
+    </a>
+    <a href="/gallery" class="rounded-xl bg-slate-900 border border-slate-800 px-6 py-3 text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-850 transition">
+      Voir la galerie
+    </a>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,106 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String   // Hashed bcrypt password
+  role      String   @default("ADMIN")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Campaign {
+  id          String     @id @default(uuid())
+  name        String
+  description String?
+  date        String
+  color       String     @default("#1E3A8A")
+  status      String     @default("ACTIVE") // ACTIVE, INACTIVE
+  logo        String?    // Logo file path
+  templates   Template[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model Club {
+  id        String   @id @default(uuid())
+  name      String
+  logo      String?  // Logo file path
+  city      String
+  facebook  String?
+  phone     String?
+  president String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Template {
+  id          String   @id @default(uuid())
+  name        String
+  width       Int      @default(1080)
+  height      Int      @default(1350)
+  status      String   @default("ACTIVE") // ACTIVE, INACTIVE
+  campaignId  String
+  campaign    Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  layers      Layer[]
+  posters     Poster[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Layer {
+  id          String   @id @default(uuid())
+  templateId  String
+  template    Template @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  type        String   // BACKGROUND, PHOTO, TEXT, QRCODE, LOGO, ASSET
+  key         String?  // Identifiant dynamique (ex: "NAME", "CITY", "SLOGAN")
+  imagePath   String?  // Chemin de l'image (si type = ASSET ou BACKGROUND)
+  
+  // Coordonnées & Dimensions
+  x           Int      @default(0)
+  y           Int      @default(0)
+  width       Int?
+  height      Int?
+  rotation    Float    @default(0.0)
+  opacity     Float    @default(1.0)
+  zIndex      Int      @default(0)
+  
+  // Propriétés Spécifiques aux Textes
+  fontFamily  String?
+  fontSize    Int?
+  fontWeight  String?  // Light, Regular, Medium, Bold, etc.
+  color       String?
+  align       String?  // left, center, right
+  isUppercase Boolean  @default(false)
+  
+  // Propriétés Spécifiques aux Images/Photos
+  fit         String?  // cover, contain, fill
+}
+
+model Poster {
+  id            String   @id @default(uuid())
+  filename      String   // Path to generated poster PNG
+  name          String?  // User's name on poster
+  city          String?  // User's city
+  school        String?  // User's school/university
+  shareCount    Int      @default(0)
+  downloadCount Int      @default(0)
+  templateId    String
+  template      Template @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+}
+
+model Setting {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

@@ -1,0 +1,157 @@
+{% extends "layouts/admin.njk" %}
+
+{% block content %}
+<div class="space-y-8" x-data="{ openAdd: false, editingClub: null }">
+  
+  <!-- Header -->
+  <div class="flex justify-between items-start">
+    <div>
+      <h1 class="text-3xl font-extrabold tracking-tight text-white">Gestion des Clubs</h1>
+      <p class="text-slate-400 mt-1">Gérez la liste des clubs Lions et Leo organisateurs de la Région 14.</p>
+    </div>
+    <button @click="openAdd = !openAdd" class="bg-brand-600 hover:bg-brand-500 text-white rounded-2xl px-5 py-3 font-semibold text-sm transition flex items-center gap-2">
+      <i class="fa-solid" :class="openAdd ? 'fa-minus' : 'fa-plus'"></i> Nouveau Club
+    </button>
+  </div>
+
+  <!-- Add Club Form -->
+  <div x-show="openAdd" x-collapse class="glass-dark border border-slate-900 rounded-3xl p-6 shadow-xl" x-cloak>
+    <h2 class="text-base font-bold text-white mb-4">Ajouter un nouveau club</h2>
+    <form action="/admin/clubs/add" method="POST" enctype="multipart/form-data" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div>
+        <label for="name" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Nom du Club</label>
+        <input type="text" id="name" name="name" required placeholder="Ex: Lions Club Cotonou Acacia" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-100 placeholder-slate-700 focus:outline-none focus:border-brand-500 transition">
+      </div>
+      <div>
+        <label for="city" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Ville</label>
+        <input type="text" id="city" name="city" required placeholder="Ex: Cotonou" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-100 placeholder-slate-700 focus:outline-none focus:border-brand-500 transition">
+      </div>
+      <div>
+        <label for="president" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Président(e)</label>
+        <input type="text" id="president" name="president" placeholder="Ex: Jean DOSSA" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-100 placeholder-slate-700 focus:outline-none focus:border-brand-500 transition">
+      </div>
+      <div>
+        <label for="phone" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Téléphone de contact</label>
+        <input type="text" id="phone" name="phone" placeholder="Ex: +229 97 00 00 00" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-100 placeholder-slate-700 focus:outline-none focus:border-brand-500 transition">
+      </div>
+      <div>
+        <label for="facebook" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Lien page Facebook (Optionnel)</label>
+        <input type="url" id="facebook" name="facebook" placeholder="Ex: https://facebook.com/club" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-100 placeholder-slate-700 focus:outline-none focus:border-brand-500 transition">
+      </div>
+      <div>
+        <label for="logo" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Logo du Club (PNG/JPG)</label>
+        <input type="file" id="logo" name="logo" class="w-full text-slate-400 text-sm file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-slate-900 file:text-slate-300 file:cursor-pointer hover:file:bg-slate-800">
+      </div>
+
+      <div class="md:col-span-2 flex justify-end gap-3 pt-2">
+        <button type="button" @click="openAdd = false" class="rounded-xl border border-slate-800 px-5 py-3 text-sm font-semibold text-slate-400 hover:text-white hover:bg-slate-900 transition">Annuler</button>
+        <button type="submit" class="rounded-xl bg-brand-600 hover:bg-brand-500 px-5 py-3 text-sm font-semibold text-white transition">Ajouter</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Club Edit Overlay Form -->
+  <div x-show="editingClub !== null" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/75 backdrop-blur-sm" x-cloak>
+    <div class="glass-dark border border-slate-900 rounded-3xl p-8 shadow-2xl max-w-xl w-full mx-4" @click.away="editingClub = null">
+      <h2 class="text-xl font-bold text-white mb-6">Modifier le Club</h2>
+      <form :action="'/admin/clubs/edit/' + editingClub?.id" method="POST" enctype="multipart/form-data" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Nom du Club</label>
+          <input type="text" name="name" :value="editingClub?.name" required class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white">
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Ville</label>
+            <input type="text" name="city" :value="editingClub?.city" required class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Président(e)</label>
+            <input type="text" name="president" :value="editingClub?.president" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white">
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Téléphone</label>
+            <input type="text" name="phone" :value="editingClub?.phone" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Facebook</label>
+            <input type="url" name="facebook" :value="editingClub?.facebook" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Modifier le logo</label>
+          <input type="file" name="logo" class="w-full text-slate-400 text-xs">
+        </div>
+        <div class="flex justify-end gap-3 pt-4">
+          <button type="button" @click="editingClub = null" class="rounded-xl border border-slate-800 px-4 py-2.5 text-sm font-semibold text-slate-400 hover:text-white transition">Annuler</button>
+          <button type="submit" class="rounded-xl bg-brand-600 hover:bg-brand-500 px-4 py-2.5 text-sm font-semibold text-white transition font-bold">Sauvegarder</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Clubs Table -->
+  <div class="glass-dark border border-slate-900 rounded-3xl overflow-hidden shadow-xl">
+    <div class="p-6 border-b border-slate-900 bg-slate-900/10">
+      <h2 class="text-lg font-bold text-white">Liste des Clubs Organisateurs</h2>
+    </div>
+
+    {% if clubs.length > 0 %}
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse text-sm">
+          <thead>
+            <tr class="text-xs font-semibold uppercase tracking-wider text-slate-500 border-b border-slate-900 bg-slate-950/20">
+              <th class="p-4">Logo</th>
+              <th class="p-4">Nom du Club</th>
+              <th class="p-4">Ville</th>
+              <th class="p-4">Président</th>
+              <th class="p-4">Contact</th>
+              <th class="p-4 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-900">
+            {% for club in clubs %}
+              <tr class="hover:bg-slate-900/20 transition">
+                <td class="p-4">
+                  <div class="h-10 w-10 bg-slate-900 rounded-full border border-slate-850 flex items-center justify-center p-1 overflow-hidden">
+                    <img src="{{ club.logo | default('/images/logo-placeholder.png') }}" alt="Logo" class="h-full w-full object-contain">
+                  </div>
+                </td>
+                <td class="p-4 font-bold text-white">{{ club.name }}</td>
+                <td class="p-4 text-slate-400 font-semibold">{{ club.city }}</td>
+                <td class="p-4 text-slate-400">{{ club.president | default('-') }}</td>
+                <td class="p-4">
+                  <div class="text-slate-400">{{ club.phone | default('-') }}</div>
+                  {% if club.facebook %}
+                    <a href="{{ club.facebook }}" target="_blank" class="text-xs text-brand-400 hover:underline">Page Facebook</a>
+                  {% endif %}
+                </td>
+                <td class="p-4 text-right space-x-2">
+                  <button 
+                    @click="editingClub = { id: '{{ club.id }}', name: '{{ club.name }}', city: '{{ club.city }}', president: '{{ club.president | default('') }}', phone: '{{ club.phone | default('') }}', facebook: '{{ club.facebook | default('') }}' }"
+                    class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-slate-700 transition"
+                  >
+                    <i class="fa-solid fa-pen-to-square text-xs"></i>
+                  </button>
+                  <form action="/admin/clubs/delete/{{ club.id }}" method="POST" class="inline-block" onsubmit="return confirm('Confirmer la suppression de ce club ?')">
+                    <button type="submit" class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-red-950/10 border border-red-900/20 text-red-400 hover:bg-red-950/20 transition">
+                      <i class="fa-solid fa-trash-can text-xs"></i>
+                    </button>
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="p-8 text-center text-slate-500">
+        <i class="fa-solid fa-users text-3xl mb-3"></i>
+        <p>Aucun club enregistré.</p>
+      </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

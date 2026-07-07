@@ -1,0 +1,57 @@
+{% extends "layouts/base.njk" %}
+
+{% block content %}
+<section class="py-5 bg-light h-100 d-flex align-items-center">
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-md-6 col-lg-5">
+        <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+          <div class="card-header bg-navy text-white text-center py-4 border-0">
+            <div class="mb-3">
+              <i class="fa-solid fa-shield-halved fs-1 text-gold"></i>
+            </div>
+            <h1 class="h3 fw-bold mb-1 text-white">Espace Administration</h1>
+            <p class="mb-0 text-white-50 small">Connectez-vous pour gérer les campagnes, les clubs et modérer les affiches.</p>
+          </div>
+          <div class="card-body p-4 p-md-5">
+            {% if errors and errors.length > 0 %}
+              <div class="alert alert-danger rounded-3 small">
+                <ul class="mb-0 ps-3">
+                  {% for error in errors %}
+                    <li>{{ error }}</li>
+                  {% endfor %}
+                </ul>
+              </div>
+            {% endif %}
+
+            <form action="/admin/login" method="POST">
+              <div class="mb-4">
+                <label for="email" class="form-label small fw-bold text-navy text-uppercase tracking-wider">Adresse Email</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-white border-end-0 text-muted"><i class="fa-solid fa-envelope"></i></span>
+                  <input type="email" id="email" name="email" required placeholder="admin@admin.bj" class="form-control border-start-0 ps-0 py-2.5">
+                </div>
+              </div>
+
+              <div class="mb-4">
+                <label for="password" class="form-label small fw-bold text-navy text-uppercase tracking-wider">Mot de Passe</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-white border-end-0 text-muted"><i class="fa-solid fa-key"></i></span>
+                  <input type="password" id="password" name="password" required placeholder="••••••••" class="form-control border-start-0 ps-0 py-2.5">
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-navy w-100 py-3 rounded-3 fw-bold mt-2 shadow-sm">
+                Se connecter
+              </button>
+            </form>
+          </div>
+          <div class="card-footer bg-white border-0 text-center py-3">
+            <p class="text-muted mb-0" style="font-size: 11px;">STOP DROGUE TOUR 2026 • Plateforme d'Administration Sécurisée</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

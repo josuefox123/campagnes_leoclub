@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="fr" class="h-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ title }} | {{ settings.site_name | default("STOP DROGUE TOUR 2026") }}</title>
+  
+  {% block meta %}{% endblock %}
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+  <!-- Alpine.js -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+  <style>
+    :root {
+      --navy-blue: #021D3A;
+      --navy-light: #0B2545;
+      --yellow-gold: #FFCC00;
+      --yellow-hover: #E6B800;
+      --white-pure: #FFFFFF;
+      --grey-light: #F8FAFC;
+    }
+    
+    body {
+      font-family: 'Outfit', sans-serif;
+      background-color: var(--white-pure);
+      color: #1E293B;
+    }
+    
+    h1, h2, h3, h4, h5, h6 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+    }
+
+    .bg-navy {
+      background-color: var(--navy-blue) !important;
+    }
+    
+    .text-navy {
+      color: var(--navy-blue) !important;
+    }
+    
+    .text-gold {
+      color: var(--yellow-gold) !important;
+    }
+
+    .btn-gold {
+      background-color: var(--yellow-gold);
+      color: var(--navy-blue);
+      font-weight: 600;
+      border: none;
+      transition: all 0.2s ease-in-out;
+    }
+
+    .btn-gold:hover, .btn-gold:focus {
+      background-color: var(--yellow-hover);
+      color: var(--navy-blue);
+      transform: translateY(-1px);
+    }
+
+    .btn-navy {
+      background-color: var(--navy-blue);
+      color: var(--white-pure);
+      font-weight: 600;
+      border: none;
+      transition: all 0.2s ease-in-out;
+    }
+
+    .btn-navy:hover, .btn-navy:focus {
+      background-color: var(--navy-light);
+      color: var(--white-pure);
+      transform: translateY(-1px);
+    }
+    
+    .nav-link-custom {
+      color: rgba(255, 255, 255, 0.85);
+      font-weight: 500;
+      transition: color 0.15s ease-in-out;
+    }
+    
+    .nav-link-custom:hover, .nav-link-custom.active {
+      color: var(--yellow-gold) !important;
+    }
+
+    .footer-custom {
+      background-color: var(--navy-blue);
+      color: rgba(255, 255, 255, 0.7);
+      border-top: 4px solid var(--yellow-gold);
+    }
+  </style>
+</head>
+<body class="d-flex flex-column h-100">
+  
+  <!-- Navigation Header -->
+  <nav class="navbar navbar-expand-md navbar-dark bg-navy sticky-top shadow-sm py-3">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+        <div class="bg-warning text-navy rounded-3 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+          <i class="fa-solid fa-ribbon text-navy fs-5"></i>
+        </div>
+        <span class="fw-bold tracking-tight">STOP DROGUE TOUR</span>
+      </a>
+      
+      <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      
+      <div class="collapse navbar-collapse" id="navbarContent">
+        <ul class="navbar-nav me-auto mb-2 mb-md-0 ms-0 ms-md-4 gap-2">
+          <li class="nav-item">
+            <a class="nav-link nav-link-custom {% if currentPath === '/' %}active{% endif %}" href="/">Accueil</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link nav-link-custom {% if currentPath === '/editor' %}active{% endif %}" href="/editor">Créer mon affiche</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link nav-link-custom {% if currentPath.startsWith('/gallery') %}active{% endif %}" href="/gallery">Galerie</a>
+          </li>
+        </ul>
+        
+        <div class="d-flex align-items-center gap-3 mt-3 mt-md-0">
+          <a href="/editor" class="btn btn-gold px-4 py-2 rounded-3 shadow-sm">
+            <i class="fa-solid fa-wand-magic-sparkles me-2"></i> Créer mon affiche
+          </a>
+
+          {% if isAuthenticated %}
+            <a href="/admin/dashboard" class="btn btn-outline-light d-flex align-items-center gap-2 rounded-3">
+              <i class="fa-solid fa-gauge"></i> <span>Dashboard</span>
+            </a>
+          {% else %}
+            <a href="/admin/login" class="text-white-50 hover:text-white transition-all text-decoration-none"><i class="fa-solid fa-lock"></i></a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="flex-shrink-0 flex-grow-1">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer-custom py-5 mt-auto">
+    <div class="container">
+      <div class="row align-items-center justify-content-between g-4">
+        <div class="col-md-8 text-center text-md-start">
+          <p class="mb-0 text-white-50 small">&copy; 2026 STOP DROGUE TOUR. Organisé par la Région 14 – District Leo 403 A4 Bénin. Devise : « Unis par le Cœur, Engagés pour l'Impact ».</p>
+        </div>
+        <div class="col-md-4 text-center text-md-end">
+          <div class="d-flex justify-content-center justify-content-md-end gap-4">
+            <a href="{{ settings.facebook_url | default('#') }}" target="_blank" class="text-white-50 hover:text-white fs-5 transition"><i class="fa-brands fa-facebook"></i></a>
+            <a href="{{ settings.instagram_url | default('#') }}" target="_blank" class="text-white-50 hover:text-white fs-5 transition"><i class="fa-brands fa-instagram"></i></a>
+            <a href="{{ settings.whatsapp_url | default('#') }}" target="_blank" class="text-white-50 hover:text-white fs-5 transition"><i class="fa-brands fa-whatsapp"></i></a>
+            <a href="mailto:{{ settings.contact_email | default('contact@stopdrogue.bj') }}" class="text-white-50 hover:text-white fs-5 transition"><i class="fa-solid fa-envelope"></i></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Bootstrap Bundle JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</body>
+</html>

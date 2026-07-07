@@ -1,0 +1,159 @@
+{% extends "layouts/admin.njk" %}
+
+{% block content %}
+<div class="space-y-8" x-data="{ openAdd: false, editingCampaign: null }">
+  
+  <!-- Header -->
+  <div class="flex justify-between items-start">
+    <div>
+      <h1 class="text-3xl font-extrabold tracking-tight text-white">Gestion des Campagnes</h1>
+      <p class="text-slate-400 mt-1">Créez et configurez les différentes vagues d'affiches du STOP DROGUE TOUR.</p>
+    </div>
+    <button @click="openAdd = !openAdd" class="bg-brand-600 hover:bg-brand-500 text-white rounded-2xl px-5 py-3 font-semibold text-sm transition flex items-center gap-2">
+      <i class="fa-solid" :class="openAdd ? 'fa-minus' : 'fa-plus'"></i> Nouvelle Campagne
+    </button>
+  </div>
+
+  <!-- Add Campaign Form -->
+  <div x-show="openAdd" x-collapse class="glass-dark border border-slate-900 rounded-3xl p-6 shadow-xl" x-cloak>
+    <h2 class="text-base font-bold text-white mb-4">Créer une nouvelle campagne</h2>
+    <form action="/admin/campaigns/add" method="POST" enctype="multipart/form-data" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div>
+        <label for="name" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Nom de la Campagne</label>
+        <input type="text" id="name" name="name" required placeholder="Ex: STOP DROGUE TOUR 2026" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-100 placeholder-slate-700 focus:outline-none focus:border-brand-500 transition">
+      </div>
+      <div>
+        <label for="date" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Dates / Période</label>
+        <input type="text" id="date" name="date" required placeholder="Ex: 24 &amp; 25 Juillet 2026" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-100 placeholder-slate-700 focus:outline-none focus:border-brand-500 transition">
+      </div>
+      <div class="md:col-span-2">
+        <label for="description" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Description</label>
+        <textarea id="description" name="description" rows="3" placeholder="Description de la campagne..." class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-100 placeholder-slate-700 focus:outline-none focus:border-brand-500 transition"></textarea>
+      </div>
+      <div>
+        <label for="color" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Couleur Principale (Hex)</label>
+        <div class="flex gap-2">
+          <input type="color" name="color" value="#3b46ff" class="h-11 w-11 bg-slate-900 border border-slate-800 rounded-xl p-1 cursor-pointer">
+          <input type="text" name="colorText" value="#3b46ff" readonly class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-500 focus:outline-none">
+        </div>
+      </div>
+      <div>
+        <label for="logo" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Logo de la Campagne (PNG/JPG)</label>
+        <input type="file" id="logo" name="logo" class="w-full text-slate-400 text-sm file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-slate-900 file:text-slate-300 file:cursor-pointer hover:file:bg-slate-800">
+      </div>
+
+      <div class="md:col-span-2 flex justify-end gap-3 pt-2">
+        <button type="button" @click="openAdd = false" class="rounded-xl border border-slate-800 px-5 py-3 text-sm font-semibold text-slate-400 hover:text-white hover:bg-slate-900 transition">Annuler</button>
+        <button type="submit" class="rounded-xl bg-brand-600 hover:bg-brand-500 px-5 py-3 text-sm font-semibold text-white transition">Enregistrer</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Campaign Edit Form Overlay -->
+  <div x-show="editingCampaign !== null" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/75 backdrop-blur-sm" x-cloak>
+    <div class="glass-dark border border-slate-900 rounded-3xl p-8 shadow-2xl max-w-xl w-full mx-4" @click.away="editingCampaign = null">
+      <h2 class="text-xl font-bold text-white mb-6">Modifier la Campagne</h2>
+      <form :action="'/admin/campaigns/edit/' + editingCampaign?.id" method="POST" enctype="multipart/form-data" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Nom</label>
+          <input type="text" name="name" :value="editingCampaign?.name" required class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Dates</label>
+          <input type="text" name="date" :value="editingCampaign?.date" required class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Description</label>
+          <textarea name="description" rows="3" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white" x-text="editingCampaign?.description"></textarea>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Couleur</label>
+            <input type="color" name="color" :value="editingCampaign?.color" class="h-10 w-full bg-slate-900 border border-slate-800 rounded-xl p-1 cursor-pointer">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Logo</label>
+            <input type="file" name="logo" class="w-full text-slate-400 text-xs">
+          </div>
+        </div>
+        <div class="flex justify-end gap-3 pt-4">
+          <button type="button" @click="editingCampaign = null" class="rounded-xl border border-slate-800 px-4 py-2.5 text-sm font-semibold text-slate-400 hover:text-white transition">Annuler</button>
+          <button type="submit" class="rounded-xl bg-brand-600 hover:bg-brand-500 px-4 py-2.5 text-sm font-semibold text-white transition font-bold">Sauvegarder</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Campaigns List -->
+  <div class="glass-dark border border-slate-900 rounded-3xl overflow-hidden shadow-xl">
+    <div class="p-6 border-b border-slate-900 bg-slate-900/10">
+      <h2 class="text-lg font-bold text-white">Liste des Campagnes</h2>
+    </div>
+
+    {% if campaigns.length > 0 %}
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse text-sm">
+          <thead>
+            <tr class="text-xs font-semibold uppercase tracking-wider text-slate-500 border-b border-slate-900 bg-slate-950/20">
+              <th class="p-4">Logo</th>
+              <th class="p-4">Nom</th>
+              <th class="p-4">Date</th>
+              <th class="p-4">Couleur</th>
+              <th class="p-4">Statut</th>
+              <th class="p-4 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-900">
+            {% for campaign in campaigns %}
+              <tr class="hover:bg-slate-900/20 transition">
+                <td class="p-4">
+                  <div class="h-10 w-16 bg-slate-900 rounded border border-slate-850 flex items-center justify-center p-1">
+                    <img src="{{ campaign.logo }}" alt="Logo" class="h-full w-full object-contain">
+                  </div>
+                </td>
+                <td class="p-4">
+                  <div class="font-bold text-white">{{ campaign.name }}</div>
+                  <div class="text-xs text-slate-500 max-w-xs truncate mt-0.5">{{ campaign.description }}</div>
+                </td>
+                <td class="p-4 text-slate-400 font-medium">{{ campaign.date }}</td>
+                <td class="p-4">
+                  <div class="flex items-center gap-2">
+                    <span class="inline-block h-4 w-4 rounded border border-slate-800" style="background-color: {{ campaign.color }};"></span>
+                    <span class="text-xs font-mono text-slate-500">{{ campaign.color }}</span>
+                  </div>
+                </td>
+                <td class="p-4">
+                  <form action="/admin/campaigns/toggle/{{ campaign.id }}" method="POST" class="inline-block">
+                    <button type="submit" class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset {% if campaign.status === 'ACTIVE' %}bg-emerald-500/10 text-emerald-400 ring-emerald-500/20 hover:bg-emerald-500/20{% else %}bg-slate-900 text-slate-500 ring-slate-850 hover:bg-slate-850{% endif %}">
+                      {{ 'Actif' if campaign.status === 'ACTIVE' else 'Inactif' }}
+                    </button>
+                  </form>
+                </td>
+                <td class="p-4 text-right space-x-2">
+                  <button 
+                    @click="editingCampaign = { id: '{{ campaign.id }}', name: '{{ campaign.name }}', date: '{{ campaign.date }}', description: '{{ campaign.description | escape }}', color: '{{ campaign.color }}' }"
+                    class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-slate-700 transition"
+                  >
+                    <i class="fa-solid fa-pen-to-square text-xs"></i>
+                  </button>
+                  <form action="/admin/campaigns/delete/{{ campaign.id }}" method="POST" class="inline-block" onsubmit="return confirm('Confirmer la suppression ? Cela effacera tous les modèles et affiches associés !')">
+                    <button type="submit" class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-red-950/10 border border-red-900/20 text-red-400 hover:bg-red-950/20 transition">
+                      <i class="fa-solid fa-trash-can text-xs"></i>
+                    </button>
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="p-8 text-center text-slate-500">
+        <i class="fa-solid fa-bullhorn text-3xl mb-3"></i>
+        <p>Aucune campagne enregistrée.</p>
+      </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,81 @@
+{% extends "layouts/admin.njk" %}
+
+{% block content %}
+<div class="space-y-8">
+  
+  <!-- Header -->
+  <div>
+    <h1 class="text-3xl font-extrabold tracking-tight text-white">Paramètres Généraux</h1>
+    <p class="text-slate-400 mt-1">Configurez l'identité visuelle de votre application, les réseaux sociaux et contacts.</p>
+  </div>
+
+  <!-- Settings Edit Form -->
+  <div class="glass-dark border border-slate-900 rounded-3xl p-6 md:p-8 shadow-xl">
+    <form action="/admin/settings/update" method="POST" enctype="multipart/form-data" class="space-y-6">
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Site Name -->
+        <div>
+          <label for="site_name" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Nom de l'application</label>
+          <input type="text" id="site_name" name="site_name" value="{{ settings.site_name }}" required class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-100 placeholder-slate-700 focus:outline-none focus:border-brand-500 transition">
+        </div>
+        
+        <!-- Contact Email -->
+        <div>
+          <label for="contact_email" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Email de contact</label>
+          <input type="email" id="contact_email" name="contact_email" value="{{ settings.contact_email }}" required class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-100 placeholder-slate-700 focus:outline-none focus:border-brand-500 transition">
+        </div>
+
+        <!-- Facebook link -->
+        <div>
+          <label for="facebook_url" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Lien Page Facebook</label>
+          <input type="url" id="facebook_url" name="facebook_url" value="{{ settings.facebook_url }}" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-100 placeholder-slate-700 focus:outline-none focus:border-brand-500 transition">
+        </div>
+        
+        <!-- Instagram Link -->
+        <div>
+          <label for="instagram_url" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Lien Compte Instagram</label>
+          <input type="url" id="instagram_url" name="instagram_url" value="{{ settings.instagram_url }}" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-100 placeholder-slate-700 focus:outline-none focus:border-brand-500 transition">
+        </div>
+        
+        <!-- WhatsApp Link -->
+        <div>
+          <label for="whatsapp_url" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Numéro WhatsApp (Format: https://wa.me/229...)</label>
+          <input type="url" id="whatsapp_url" name="whatsapp_url" value="{{ settings.whatsapp_url }}" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-100 placeholder-slate-700 focus:outline-none focus:border-brand-500 transition">
+        </div>
+
+        <!-- Primary Hex Color -->
+        <div>
+          <label for="primary_color" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Couleur principale du site</label>
+          <div class="flex gap-2">
+            <input type="color" id="primary_color" name="primary_color" value="{{ settings.primary_color | default('#3b46ff') }}" class="h-11 w-11 bg-slate-900 border border-slate-800 rounded-xl p-1 cursor-pointer">
+            <input type="text" readonly value="{{ settings.primary_color | default('#3b46ff') }}" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-500">
+          </div>
+        </div>
+      </div>
+
+      <!-- Site Logo File Upload -->
+      <div class="border-t border-slate-900 pt-6">
+        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Logo du Site Actuel</label>
+        <div class="flex flex-col sm:flex-row items-center gap-6">
+          <div class="h-20 w-20 bg-slate-900 border border-slate-850 rounded-2xl p-2 flex items-center justify-center overflow-hidden">
+            <img src="{{ settings.site_logo | default('/images/logo-placeholder.png') }}" alt="Logo site" class="h-full w-full object-contain">
+          </div>
+          <div>
+            <input type="file" name="logo" class="w-full text-slate-400 text-sm file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-slate-900 file:text-slate-300 file:cursor-pointer hover:file:bg-slate-800">
+            <p class="text-[10px] text-slate-500 mt-2">Format suggéré: PNG transparent carré (Max 2Mo)</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="border-t border-slate-900 pt-6 flex justify-end">
+        <button type="submit" class="rounded-2xl bg-brand-600 hover:bg-brand-500 px-6 py-3.5 font-bold text-white shadow-lg shadow-brand-550/20 active:scale-[0.98] transition">
+          <i class="fa-solid fa-save mr-2"></i> Enregistrer les Paramètres
+        </button>
+      </div>
+
+    </form>
+  </div>
+
+</div>
+{% endblock %}

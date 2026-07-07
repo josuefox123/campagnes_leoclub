@@ -1,0 +1,128 @@
+{% extends "layouts/admin.njk" %}
+
+{% block content %}
+<div class="space-y-8">
+  
+  <!-- Header -->
+  <div>
+    <h1 class="text-3xl font-extrabold tracking-tight text-white">Tableau de bord</h1>
+    <p class="text-slate-400 mt-1">Résumé analytique de la campagne et des performances du générateur.</p>
+  </div>
+
+  <!-- Metrics Grid -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
+    
+    <!-- Metric Card -->
+    <div class="glass-dark border border-slate-900 rounded-3xl p-6 relative overflow-hidden">
+      <div class="flex items-center justify-between text-slate-500">
+        <span class="text-xs font-semibold uppercase tracking-wider">Affiches</span>
+        <i class="fa-solid fa-images text-lg text-brand-400"></i>
+      </div>
+      <p class="text-3xl font-bold text-white mt-2">{{ metrics.totalPosters }}</p>
+      <span class="text-[10px] text-emerald-400 font-medium mt-1 inline-flex items-center gap-1"><i class="fa-solid fa-arrow-trend-up"></i> Générées au total</span>
+    </div>
+
+    <!-- Metric Card -->
+    <div class="glass-dark border border-slate-900 rounded-3xl p-6">
+      <div class="flex items-center justify-between text-slate-500">
+        <span class="text-xs font-semibold uppercase tracking-wider">Téléchargements</span>
+        <i class="fa-solid fa-download text-lg text-emerald-400"></i>
+      </div>
+      <p class="text-3xl font-bold text-white mt-2">{{ metrics.totalDownloads }}</p>
+      <span class="text-[10px] text-slate-500 font-medium mt-1">Clics d'exportation</span>
+    </div>
+
+    <!-- Metric Card -->
+    <div class="glass-dark border border-slate-900 rounded-3xl p-6">
+      <div class="flex items-center justify-between text-slate-500">
+        <span class="text-xs font-semibold uppercase tracking-wider">Partages</span>
+        <i class="fa-solid fa-share-nodes text-lg text-blue-400"></i>
+      </div>
+      <p class="text-3xl font-bold text-white mt-2">{{ metrics.totalShares }}</p>
+      <span class="text-[10px] text-slate-500 font-medium mt-1">Partages réseaux soc.</span>
+    </div>
+
+    <!-- Metric Card -->
+    <div class="glass-dark border border-slate-900 rounded-3xl p-6">
+      <div class="flex items-center justify-between text-slate-500">
+        <span class="text-xs font-semibold uppercase tracking-wider">Campagnes</span>
+        <i class="fa-solid fa-bullhorn text-lg text-purple-400"></i>
+      </div>
+      <p class="text-3xl font-bold text-white mt-2">{{ metrics.totalCampaigns }}</p>
+      <span class="text-[10px] text-slate-500 font-medium mt-1">Campagnes créées</span>
+    </div>
+
+    <!-- Metric Card -->
+    <div class="glass-dark border border-slate-900 rounded-3xl p-6">
+      <div class="flex items-center justify-between text-slate-500">
+        <span class="text-xs font-semibold uppercase tracking-wider">Modèles</span>
+        <i class="fa-solid fa-cubes text-lg text-orange-400"></i>
+      </div>
+      <p class="text-3xl font-bold text-white mt-2">{{ metrics.totalTemplates }}</p>
+      <span class="text-[10px] text-slate-500 font-medium mt-1">Gabarits configurés</span>
+    </div>
+
+  </div>
+
+  <!-- Recent Posters Section -->
+  <div class="glass-dark border border-slate-900 rounded-3xl overflow-hidden shadow-xl">
+    <div class="p-6 border-b border-slate-900 flex justify-between items-center bg-slate-900/10">
+      <div>
+        <h2 class="text-lg font-bold text-white">Dernières Affiches Générées</h2>
+        <p class="text-xs text-slate-500 mt-0.5">Historique des 5 dernières créations.</p>
+      </div>
+      <a href="/admin/posters" class="text-xs font-bold text-brand-400 hover:text-brand-300 transition">
+        Gérer toutes les affiches <i class="fa-solid fa-arrow-right-long ml-1"></i>
+      </a>
+    </div>
+
+    {% if recentPosters.length > 0 %}
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse text-sm">
+          <thead>
+            <tr class="text-xs font-semibold uppercase tracking-wider text-slate-500 border-b border-slate-900 bg-slate-950/20">
+              <th class="p-4">Miniature</th>
+              <th class="p-4">Nom / Prénom</th>
+              <th class="p-4">Ville</th>
+              <th class="p-4">Modèle</th>
+              <th class="p-4">Date</th>
+              <th class="p-4 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-900">
+            {% for poster in recentPosters %}
+              <tr class="hover:bg-slate-900/20 transition">
+                <td class="p-4">
+                  <div class="h-12 w-10 bg-slate-950 rounded border border-slate-800 overflow-hidden">
+                    <img src="{{ poster.filename }}" alt="Miniature" class="h-full w-full object-cover">
+                  </div>
+                </td>
+                <td class="p-4 font-semibold text-white">{{ poster.name | default('Sensibilisation') }}</td>
+                <td class="p-4 text-slate-400">{{ poster.city | default('-') }}</td>
+                <td class="p-4 text-slate-400">{{ poster.template.name }}</td>
+                <td class="p-4 text-slate-500">{{ poster.createdAt | date('DD/MM/YYYY HH:mm') | default('Récemment') }}</td>
+                <td class="p-4 text-right space-x-2">
+                  <a href="/gallery/share/{{ poster.id }}" target="_blank" class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-slate-700 transition">
+                    <i class="fa-solid fa-eye text-xs"></i>
+                  </a>
+                  <form action="/admin/posters/delete/{{ poster.id }}" method="POST" class="inline-block" onsubmit="return confirm('Confirmer la suppression de cette affiche ?')">
+                    <button type="submit" class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-red-950/10 border border-red-900/20 text-red-400 hover:bg-red-950/20 transition">
+                      <i class="fa-solid fa-trash-can text-xs"></i>
+                    </button>
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="p-8 text-center text-slate-500">
+        <i class="fa-solid fa-inbox text-3xl mb-3"></i>
+        <p>Aucune affiche générée pour le moment.</p>
+      </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

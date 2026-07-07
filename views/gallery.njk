@@ -1,0 +1,117 @@
+{% extends "layouts/base.njk" %}
+
+{% block content %}
+<section class="py-5 bg-white">
+  <div class="container py-3">
+    
+    <!-- Gallery Header -->
+    <div class="row align-items-center justify-content-between mb-5 g-4 border-bottom pb-4">
+      <div class="col-md-8">
+        <h1 class="h2 text-navy fw-bold mb-1">Galerie des Affiches</h1>
+        <p class="text-muted mb-0">Soutenez la campagne en parcourant toutes les affiches générées par les citoyens engagés.</p>
+      </div>
+
+      <!-- Search Input -->
+      <div class="col-md-4 col-lg-3">
+        <form action="/gallery" method="GET" class="input-group">
+          <input 
+            type="text" 
+            name="search" 
+            value="{{ search }}" 
+            placeholder="Nom, ville..." 
+            class="form-control rounded-start-3"
+            aria-label="Recherche"
+          >
+          <button type="submit" class="btn btn-navy rounded-end-3">
+            <i class="fa-solid fa-magnifying-glass"></i>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Poster Grid -->
+    {% if posters.length > 0 %}
+      <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+        {% for poster in posters %}
+          <div class="col">
+            <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden position-relative poster-card">
+              <div class="ratio ratio-4x5 overflow-hidden bg-dark position-relative">
+                <img src="{{ poster.filename }}" alt="Affiche de {{ poster.name }}" class="object-fit-cover w-100 h-100" style="transition: transform 0.3s ease;">
+                
+                <!-- Hover Overlay for sharing and downloading -->
+                <div class="poster-overlay position-absolute top-0 start-0 w-100 h-100 bg-dark bg-opacity-75 d-flex flex-column justify-content-end p-4" style="z-index: 3; transition: opacity 0.2s ease;">
+                  <a href="/gallery/share/{{ poster.id }}" class="btn btn-light w-100 py-2 rounded-3 fw-bold shadow mb-2">
+                    <i class="fa-solid fa-share-nodes me-2"></i> Voir &amp; Partager
+                  </a>
+                  <a href="{{ poster.filename }}" download="Affiche_Stop_Drogue_{{ poster.name | default('Sensibilisation') }}.png" onclick="fetch('/gallery/download/{{ poster.id }}', {method:'POST'})" class="btn btn-navy w-100 py-2 rounded-3 fw-bold border border-light-subtle shadow">
+                    <i class="fa-solid fa-download me-2"></i> Télécharger
+                  </a>
+                </div>
+              </div>
+              <style>
+                .poster-overlay { opacity: 0; }
+                .poster-card:hover .poster-overlay { opacity: 1; }
+                .poster-card:hover img { transform: scale(1.05); }
+              </style>
+              
+              <div class="card-body p-4 bg-white d-flex align-items-center justify-content-between gap-3">
+                <div class="min-w-0">
+                  <h5 class="card-title text-navy text-truncate h6 fw-bold mb-1">{{ poster.name | default("Soutien de la campagne") }}</h5>
+                  <p class="card-text text-muted small text-truncate mb-0">{{ poster.city | default("Bénin") }}</p>
+                </div>
+                <div class="badge bg-navy-subtle text-navy border rounded-pill d-flex align-items-center gap-1.5 px-2.5 py-1.5 small font-semibold">
+                  <i class="fa-solid fa-heart text-danger"></i> {{ poster.shareCount + poster.downloadCount }}
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+
+      <!-- Pagination Navigation -->
+      {% if totalPages > 1 %}
+        <nav class="mt-5 pt-4 border-top">
+          <ul class="pagination justify-content-center gap-1">
+            {% if currentPage > 1 %}
+              <li class="page-item">
+                <a href="/gallery?page={{ currentPage - 1 }}&amp;search={{ search }}" class="page-link rounded-3 border-0 bg-light text-navy shadow-xs px-3 py-2">
+                  <i class="fa-solid fa-angle-left"></i>
+                </a>
+              </li>
+            {% endif %}
+            
+            {% for i in range(1, totalPages + 1) %}
+              <li class="page-item {% if currentPage === i %}active{% endif %}">
+                <a 
+                  href="/gallery?page={{ i }}&amp;search={{ search }}" 
+                  class="page-link rounded-3 border-0 px-3.5 py-2 {% if currentPage === i %}btn-navy text-white{% else %}bg-light text-navy{% endif %}"
+                >
+                  {{ i }}
+                </a>
+              </li>
+            {% endfor %}
+
+            {% if currentPage < totalPages %}
+              <li class="page-item">
+                <a href="/gallery?page={{ currentPage + 1 }}&amp;search={{ search }}" class="page-link rounded-3 border-0 bg-light text-navy shadow-xs px-3 py-2">
+                  <i class="fa-solid fa-angle-right"></i>
+                </a>
+              </li>
+            {% endif %}
+          </ul>
+        </nav>
+      {% endif %}
+
+    {% else %}
+      <div class="text-center py-5 border border-dashed rounded-4 bg-white shadow-sm">
+        <i class="fa-solid fa-users-slash text-muted display-4 mb-3"></i>
+        <p class="text-muted">Aucune affiche ne correspond à votre recherche.</p>
+        <a href="/gallery" class="btn btn-navy px-4 py-2 mt-2 rounded-3">
+          Réinitialiser la recherche
+        </a>
+      </div>
+    {% endif %}
+
+  </div>
+</section>
+{% endblock %}

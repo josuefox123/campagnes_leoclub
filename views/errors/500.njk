@@ -1,0 +1,24 @@
+{% extends "layouts/base.njk" %}
+
+{% block content %}
+<section class="flex-1 flex flex-col items-center justify-center py-20 text-center px-4">
+  <div class="h-20 w-20 rounded-3xl bg-red-500/10 text-red-500 flex items-center justify-center text-3xl mb-6 border border-red-500/20 shadow-lg shadow-red-550/10">
+    <i class="fa-solid fa-bug animate-bounce"></i>
+  </div>
+  <h1 class="text-4xl font-extrabold text-white tracking-tight sm:text-5xl">Erreur Interne du Serveur</h1>
+  <p class="text-slate-400 mt-4 max-w-md">Une erreur inattendue s'est produite sur le serveur. Nos équipes travaillent à la résolution du problème.</p>
+  
+  {% if error %}
+    <div class="mt-6 max-w-lg bg-slate-900 border border-slate-800 rounded-2xl p-4 text-left font-mono text-xs text-red-400 overflow-x-auto">
+      <strong>Détail technique :</strong>
+      <pre class="mt-2">{{ error }}</pre>
+    </div>
+  {% endif %}
+
+  <div class="mt-10">
+    <a href="/" class="rounded-xl bg-brand-600 px-6 py-3 text-sm font-semibold text-white shadow-md hover:bg-brand-500 transition">
+      <i class="fa-solid fa-house mr-2"></i> Retour à l'accueil
+    </a>
+  </div>
+</section>
+{% endblock %}

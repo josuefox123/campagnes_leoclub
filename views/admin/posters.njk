@@ -1,0 +1,113 @@
+{% extends "layouts/admin.njk" %}
+
+{% block content %}
+<div class="space-y-8">
+  
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+    <div>
+      <h1 class="text-3xl font-extrabold tracking-tight text-white">Modération des Affiches</h1>
+      <p class="text-slate-400 mt-1">Supervisez et modérez les posters générés par le public.</p>
+    </div>
+    <div class="text-xs text-slate-500 font-semibold uppercase tracking-wider bg-slate-900 border border-slate-800 px-4 py-2 rounded-xl">
+      Total : {{ total }} affiche(s)
+    </div>
+  </div>
+
+  <!-- Posters Table -->
+  <div class="glass-dark border border-slate-900 rounded-3xl overflow-hidden shadow-xl">
+    
+    {% if posters.length > 0 %}
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse text-sm">
+          <thead>
+            <tr class="text-xs font-semibold uppercase tracking-wider text-slate-500 border-b border-slate-900 bg-slate-950/20">
+              <th class="p-4">Affiche</th>
+              <th class="p-4">Nom / Prénom</th>
+              <th class="p-4">Ville / Établissement</th>
+              <th class="p-4">Gabarit</th>
+              <th class="p-4">Performance</th>
+              <th class="p-4 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-900">
+            {% for poster in posters %}
+              <tr class="hover:bg-slate-900/20 transition">
+                <td class="p-4">
+                  <div class="h-16 w-12 bg-slate-950 rounded border border-slate-800 overflow-hidden relative group">
+                    <img src="{{ poster.filename }}" alt="Miniature" class="h-full w-full object-cover">
+                    <a href="{{ poster.filename }}" target="_blank" class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transition duration-200">
+                      <i class="fa-solid fa-up-right-from-square text-xs"></i>
+                    </a>
+                  </div>
+                </td>
+                <td class="p-4">
+                  <div class="font-bold text-white">{{ poster.name | default('Anonyme') }}</div>
+                  <div class="text-[10px] text-slate-500 mt-0.5">{{ poster.createdAt | date('DD/MM/YYYY HH:mm') | default('Date inconnue') }}</div>
+                </td>
+                <td class="p-4">
+                  <div class="text-slate-300 font-semibold">{{ poster.city | default('-') }}</div>
+                  <div class="text-xs text-slate-500 mt-0.5">{{ poster.school | default('-') }}</div>
+                </td>
+                <td class="p-4 text-slate-400 font-medium">
+                  {{ poster.template.name }}
+                </td>
+                <td class="p-4">
+                  <div class="flex items-center gap-4 text-xs font-semibold text-slate-500">
+                    <span class="flex items-center gap-1"><i class="fa-solid fa-download text-emerald-500/80"></i> {{ poster.downloadCount }}</span>
+                    <span class="flex items-center gap-1"><i class="fa-solid fa-share-nodes text-blue-500/80"></i> {{ poster.shareCount }}</span>
+                  </div>
+                </td>
+                <td class="p-4 text-right space-x-2">
+                  <a href="/gallery/share/{{ poster.id }}" target="_blank" class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-slate-900 border border-slate-800 text-slate-450 hover:text-white hover:border-slate-700 transition">
+                    <i class="fa-solid fa-eye text-xs"></i>
+                  </a>
+                  <form action="/admin/posters/delete/{{ poster.id }}" method="POST" class="inline-block" onsubmit="return confirm('Confirmer la suppression de cette affiche ? Cette action supprimera définitivement le fichier image du serveur.')">
+                    <button type="submit" class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-red-950/10 border border-red-900/20 text-red-400 hover:bg-red-950/20 transition">
+                      <i class="fa-solid fa-trash-can text-xs"></i>
+                    </button>
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      {% if totalPages > 1 %}
+        <nav class="p-6 border-t border-slate-900 flex items-center justify-center gap-2">
+          {% if currentPage > 1 %}
+            <a href="/admin/posters?page={{ currentPage - 1 }}" class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition">
+              <i class="fa-solid fa-angle-left text-xs"></i>
+            </a>
+          {% endif %}
+          
+          {% for i in range(1, totalPages + 1) %}
+            <a 
+              href="/admin/posters?page={{ i }}" 
+              class="inline-flex h-9 w-9 items-center justify-center rounded-xl text-xs font-semibold transition {% if currentPage === i %}bg-brand-600 text-white{% else %}bg-slate-900 border border-slate-800 text-slate-400 hover:text-white{% endif %}"
+            >
+              {{ i }}
+            </a>
+          {% endfor %}
+
+          {% if currentPage < totalPages %}
+            <a href="/admin/posters?page={{ currentPage + 1 }}" class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition">
+              <i class="fa-solid fa-angle-right text-xs"></i>
+            </a>
+          {% endif %}
+        </nav>
+      {% endif %}
+
+    {% else %}
+      <div class="p-12 text-center text-slate-500">
+        <i class="fa-solid fa-shield text-4xl mb-3"></i>
+        <p class="text-base">Aucune affiche générée.</p>
+      </div>
+    {% endif %}
+
+  </div>
+
+</div>
+{% endblock %}

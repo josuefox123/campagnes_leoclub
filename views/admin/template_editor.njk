@@ -1,0 +1,275 @@
+{% extends "layouts/admin.njk" %}
+
+{% block content %}
+<div class="space-y-8" 
+     x-data="templateVisualEditor()" 
+     x-init="initEditor({{ template.texts | dump | escape }}, {{ template.photoX }}, {{ template.photoY }}, {{ template.photoWidth }}, {{ template.photoHeight }}, {{ template.photoRotation }}, {{ template.width }}, {{ template.height }})">
+  
+  <!-- Header -->
+  <div class="flex justify-between items-center border-b border-slate-900 pb-6">
+    <div>
+      <h1 class="text-3xl font-extrabold tracking-tight text-white">Éditeur de Modèle</h1>
+      <p class="text-slate-400 mt-1">Configurez visuellement la zone de détourage de la photo et la position des textes.</p>
+    </div>
+    <a href="/admin/templates" class="text-xs font-semibold text-slate-400 hover:text-white transition flex items-center gap-2">
+      <i class="fa-solid fa-arrow-left-long"></i> Retour
+    </a>
+  </div>
+
+  <form action="/admin/templates/edit/{{ template.id }}" method="POST" enctype="multipart/form-data" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+    
+    <!-- Hidden inputs representing visual data submitted to DB -->
+    <input type="hidden" name="photoX" x-model="photoX">
+    <input type="hidden" name="photoY" x-model="photoY">
+    <input type="hidden" name="photoWidth" x-model="photoWidth">
+    <input type="hidden" name="photoHeight" x-model="photoHeight">
+    <input type="hidden" name="photoRotation" x-model="photoRotation">
+    <!-- JSON string to submit all texts configurations in one go -->
+    <input type="hidden" name="textsJson" x-model="getTextsJson()">
+
+    <!-- Left Controls Panel: col-span-5 -->
+    <div class="lg:col-span-5 space-y-6">
+      
+      <!-- Template Base Meta -->
+      <div class="glass-dark border border-slate-900 rounded-3xl p-6 shadow-xl space-y-4">
+        <h2 class="text-sm font-bold text-white uppercase tracking-wider">Propriétés de Base</h2>
+        <div>
+          <label for="name" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Nom du modèle</label>
+          <input type="text" id="name" name="name" value="{{ template.name }}" required class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Remplacer le fond d'affiche</label>
+          <input type="file" name="backgroundImage" class="w-full text-slate-500 text-xs">
+        </div>
+      </div>
+
+      <!-- Photo viewport Box Controls -->
+      <div class="glass-dark border border-slate-900 rounded-3xl p-6 shadow-xl space-y-4">
+        <h2 class="text-sm font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-2">
+          <i class="fa-solid fa-crop-simple"></i> Zone d'insertion Photo
+        </h2>
+        
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-400 mb-1">X Position (px)</label>
+            <input type="number" x-model.number="photoX" @input="syncOverlays()" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-400 mb-1">Y Position (px)</label>
+            <input type="number" x-model.number="photoY" @input="syncOverlays()" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-400 mb-1">Largeur (px)</label>
+            <input type="number" x-model.number="photoWidth" @input="syncOverlays()" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-400 mb-1">Hauteur (px)</label>
+            <input type="number" x-model.number="photoHeight" @input="syncOverlays()" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none">
+          </div>
+        </div>
+      </div>
+
+      <!-- Dynamic Texts Coordinates -->
+      <div class="glass-dark border border-slate-900 rounded-3xl p-6 shadow-xl space-y-6">
+        <h2 class="text-sm font-bold text-blue-400 uppercase tracking-wider flex items-center gap-2">
+          <i class="fa-solid fa-font"></i> Positionnement des Textes
+        </h2>
+        
+        <div class="space-y-6">
+          <template x-for="(text, index) in texts" :key="text.id">
+            <div class="border-t border-slate-900/80 pt-4 first:border-0 first:pt-0 space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-slate-200" x-text="'Texte : ' + text.type"></span>
+                <span class="text-[10px] font-mono text-slate-500" x-text="text.width + 'x' + text.fontSize + 'px'"></span>
+              </div>
+              
+              <div class="grid grid-cols-3 gap-2">
+                <div>
+                  <label class="block text-[10px] text-slate-400 mb-1">Position Y (px)</label>
+                  <input type="number" x-model.number="text.y" @input="syncOverlays()" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1.5 text-xs text-white">
+                </div>
+                <div>
+                  <label class="block text-[10px] text-slate-400 mb-1">Position X (px)</label>
+                  <input type="number" x-model.number="text.x" @input="syncOverlays()" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1.5 text-xs text-white">
+                </div>
+                <div>
+                  <label class="block text-[10px] text-slate-400 mb-1">Largeur (px)</label>
+                  <input type="number" x-model.number="text.width" @input="syncOverlays()" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1.5 text-xs text-white">
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-[10px] text-slate-400 mb-1">Taille police (px)</label>
+                  <input type="number" x-model.number="text.fontSize" @input="syncOverlays()" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-white">
+                </div>
+                <div>
+                  <label class="block text-[10px] text-slate-400 mb-1">Couleur</label>
+                  <input type="text" x-model="text.color" @input="syncOverlays()" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-white font-mono">
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+
+      <!-- Action Button -->
+      <button type="submit" class="w-full rounded-2xl bg-brand-600 hover:bg-brand-500 py-4 font-bold text-white shadow-lg transition">
+        Enregistrer la Configuration
+      </button>
+
+    </div>
+
+    <!-- Right Visual Editor Panel: col-span-7 -->
+    <div class="lg:col-span-7 flex flex-col items-center">
+      <div class="glass-dark rounded-3xl p-5 border border-slate-900 shadow-xl w-full flex flex-col items-center justify-center">
+        
+        <span class="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-3">Aperçu &amp; Placement</span>
+
+        <!-- Relative Container representing the poster viewport -->
+        <div id="editor-container" 
+             class="relative w-full max-w-[420px] aspect-[4/5] bg-slate-950 border border-slate-850 rounded-2xl overflow-hidden shadow-2xl select-none"
+             @mousemove="onDragMove($event)"
+             @mouseup="onDragEnd()"
+             @mouseleave="onDragEnd()">
+          
+          <!-- Background Template image -->
+          <img src="{{ template.backgroundImage }}" alt="Fond Affiche" class="w-full h-full object-cover pointer-events-none">
+
+          <!-- Dynamic Visual Box overlays -->
+          
+          <!-- Photo Zone Overlay Box -->
+          <div id="photo-box" 
+               :style="{ left: photoLeft, top: photoTop, width: photoWidthScaled, height: photoHeightScaled }"
+               class="absolute border-2 border-emerald-500 bg-emerald-500/10 cursor-move flex items-center justify-center font-bold text-xs text-emerald-400 rounded"
+               @mousedown="onDragStart($event, 'photo')">
+            ZONE PHOTO
+          </div>
+
+          <!-- Dynamic Text Overlay Boxes -->
+          <template x-for="text in texts" :key="text.id">
+            <div :id="'text-box-' + text.id"
+                 :style="{ left: (text.x / baseWidth * 100) + '%', top: ((text.y - text.fontSize) / baseHeight * 100) + '%', width: (text.width / baseWidth * 100) + '%', height: (text.fontSize / baseHeight * 100) + '%' }"
+                 class="absolute border border-blue-500 bg-blue-500/10 cursor-move flex items-center justify-center font-bold text-[8px] text-blue-300 rounded"
+                 @mousedown="onDragStart($event, 'text', text.id)">
+              <span x-text="text.type"></span>
+            </div>
+          </template>
+
+        </div>
+        
+        <div class="mt-4 text-center text-slate-500 text-xs">
+          <p class="flex items-center justify-center gap-1.5"><i class="fa-solid fa-arrows-up-down-left-right"></i> Faîtes glisser les zones directement pour les déplacer.</p>
+        </div>
+
+      </div>
+    </div>
+
+  </form>
+</div>
+
+<script>
+  function templateVisualEditor() {
+    return {
+      texts: [],
+      photoX: 0,
+      photoY: 0,
+      photoWidth: 0,
+      photoHeight: 0,
+      photoRotation: 0,
+      
+      baseWidth: 1080,
+      baseHeight: 1350,
+      
+      // Scaled CSS properties for overlays
+      photoLeft: '0%',
+      photoTop: '0%',
+      photoWidthScaled: '0%',
+      photoHeightScaled: '0%',
+      
+      // Drag States
+      activeDrag: null, // 'photo' or text ID
+      dragOffset: { x: 0, y: 0 },
+      initialCoordinates: { x: 0, y: 0 },
+
+      initEditor(texts, px, py, pw, ph, prot, width, height) {
+        this.texts = texts || [];
+        this.photoX = px;
+        this.photoY = py;
+        this.photoWidth = pw;
+        this.photoHeight = ph;
+        this.photoRotation = prot || 0;
+        this.baseWidth = width || 1080;
+        this.baseHeight = height || 1350;
+        
+        this.syncOverlays();
+      },
+
+      syncOverlays() {
+        this.photoLeft = `${(this.photoX / this.baseWidth) * 100}%`;
+        this.photoTop = `${(this.photoY / this.baseHeight) * 100}%`;
+        this.photoWidthScaled = `${(this.photoWidth / this.baseWidth) * 100}%`;
+        this.photoHeightScaled = `${(this.photoHeight / this.baseHeight) * 100}%`;
+      },
+
+      getTextsJson() {
+        return JSON.stringify(this.texts);
+      },
+
+      // Visual Drag Operations
+      onDragStart(event, type, id = null) {
+        event.preventDefault();
+        const container = document.getElementById('editor-container');
+        const containerRect = container.getBoundingClientRect();
+        
+        this.activeDrag = id ? id : type;
+        
+        // Save initial coordinates
+        if (this.activeDrag === 'photo') {
+          this.initialCoordinates = { x: this.photoX, y: this.photoY };
+        } else {
+          const activeText = this.texts.find(t => t.id === this.activeDrag);
+          this.initialCoordinates = { x: activeText.x, y: activeText.y };
+        }
+        
+        this.dragOffset = {
+          x: event.clientX,
+          y: event.clientY
+        };
+      },
+
+      onDragMove(event) {
+        if (!this.activeDrag) return;
+        event.preventDefault();
+
+        const container = document.getElementById('editor-container');
+        const containerRect = container.getBoundingClientRect();
+        
+        // Calculate coordinate ratios (Original px size / rendered client width)
+        const scaleX = this.baseWidth / containerRect.width;
+        const scaleY = this.baseHeight / containerRect.height;
+        
+        const dx = (event.clientX - this.dragOffset.x) * scaleX;
+        const dy = (event.clientY - this.dragOffset.y) * scaleY;
+
+        if (this.activeDrag === 'photo') {
+          this.photoX = Math.round(this.initialCoordinates.x + dx);
+          this.photoY = Math.round(this.initialCoordinates.y + dy);
+        } else {
+          const activeText = this.texts.find(t => t.id === this.activeDrag);
+          if (activeText) {
+            activeText.x = Math.round(this.initialCoordinates.x + dx);
+            activeText.y = Math.round(this.initialCoordinates.y + dy);
+          }
+        }
+        
+        this.syncOverlays();
+      },
+
+      onDragEnd() {
+        this.activeDrag = null;
+      }
+    };
+  }
+</script>
+{% endblock %}
